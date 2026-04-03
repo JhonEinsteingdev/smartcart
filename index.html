@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#16a34a" id="metaTheme"/>
+<link rel="manifest" href="manifest.json"/>
+<title>SmartCart</title>
+<style>
+/* ── Variables ───────────────────────────── */
+:root {
+  --p:#16a34a; --p2:#15803d; --p3:#dcfce7;
+  --blue:#2563eb; --red:#ef4444; --orange:#f97316; --purple:#7c3aed; --yellow:#ca8a04;
+  --bg:#f8fdf9; --bg2:#f0fdf4; --card:#fff; --t:#0f172a; --t2:#64748b; --bd:#e2e8f0;
+  --sh:0 1px 3px rgba(0,0,0,.08); --sh2:0 4px 16px rgba(0,0,0,.1);
+  --r:14px; --r2:10px; --r3:8px;
+}
+[data-theme="dark"] {
+  --p:#22c55e; --p2:#16a34a; --p3:#14532d;
+  --bg:#0f172a; --bg2:#1e293b; --card:#1e293b; --t:#f1f5f9; --t2:#94a3b8; --bd:#334155;
+  --sh:0 1px 3px rgba(0,0,0,.4); --sh2:0 4px 16px rgba(0,0,0,.4);
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --p:#22c55e; --p2:#16a34a; --p3:#14532d;
+    --bg:#0f172a; --bg2:#1e293b; --card:#1e293b; --t:#f1f5f9; --t2:#94a3b8; --bd:#334155;
+    --sh:0 1px 3px rgba(0,0,0,.4); --sh2:0 4px 16px rgba(0,0,0,.4);
+  }
+}
+/* ── Reset ───────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%;overscroll-behavior:none}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg);color:var(--t);min-height:100%;
+  padding-bottom:calc(68px + env(safe-area-inset-bottom));
+  transition:background .25s,color .25s;
+}
+/* ── Header ──────────────────────────────── */
+.header{
+  position:sticky;top:0;z-index:50;
+  background:var(--p);
+  padding:calc(14px + env(safe-area-inset-top)) 16px 14px;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.header-row{display:flex;justify-content:space-between;align-items:center}
+.header h1{color:#fff;font-size:1.25rem;font-weight:800;letter-spacing:-.5px}
+.header-sub{color:rgba(255,255,255,.75);font-size:.75rem;margin-top:1px}
+.header-actions{display:flex;gap:8px;align-items:center}
+.icon-btn{
+  width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
+  background:rgba(255,255,255,.2);color:#fff;font-size:1.1rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;position:relative;
+}
+.icon-btn:active{background:rgba(255,255,255,.35)}
+.notif-dot{
+  position:absolute;top:-2px;right:-2px;width:16px;height:16px;
+  background:var(--red);border-radius:50%;font-size:.6rem;font-weight:700;
+  color:#fff;display:none;align-items:center;justify-content:center;
+  border:2px solid var(--p);
+}
+/* ── Bottom nav ──────────────────────────── */
+nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:50;
+  background:var(--card);border-top:1px solid var(--bd);
+  display:flex;
+  padding-bottom:env(safe-area-inset-bottom);
+  box-shadow:0 -2px 12px rgba(0,0,0,.08);
+}
+nav button{
+  flex:1;border:none;background:none;padding:10px 4px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  color:var(--t2);cursor:pointer;font-size:.6rem;font-weight:600;
+  transition:color .15s;min-height:44px;
+}
+nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+nav button.active{color:var(--p)}
+nav button.active svg{stroke:var(--p)}
+/* ── Main ────────────────────────────────── */
+main{max-width:600px;margin:0 auto;padding:16px 14px 0}
+.tab{display:none}.tab.active{display:block}
+/* ── Cards ───────────────────────────────── */
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:16px;margin-bottom:12px}
+.card-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--t2);margin-bottom:10px}
+/* ── Buttons ─────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px 18px;border-radius:var(--r2);border:none;cursor:pointer;
+  font-size:.875rem;font-weight:700;transition:.15s;min-height:44px;
+}
+.btn-p{background:var(--p);color:#fff}.btn-p:active{background:var(--p2)}
+.btn-red{background:var(--red);color:#fff}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-ghost{background:transparent;color:var(--t2);border:1.5px solid var(--bd)}
+.btn-ghost:active{border-color:var(--p);color:var(--p)}
+.btn-full{width:100%}
+.btn-sm{padding:7px 12px;font-size:.78rem;min-height:36px}
+/* ── Forms ───────────────────────────────── */
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:.78rem;font-weight:600;color:var(--t2);margin-bottom:5px}
+.fi,.fs{
+  width:100%;padding:11px 12px;border:1.5px solid var(--bd);border-radius:var(--r2);
+  font-size:.9rem;font-family:inherit;background:var(--bg);color:var(--t);
+  outline:none;transition:border-color .15s,box-shadow .15s;
+}
+.fi:focus,.fs:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(22,163,74,.12)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* ── Tags ────────────────────────────────── */
+.tag{
+  display:inline-block;padding:3px 9px;border-radius:20px;
+  font-size:.68rem;font-weight:700;white-space:nowrap;
+}
+.tag-g{background:#dcfce7;color:#15803d} .tag-r{background:#fee2e2;color:#dc2626}
+.tag-o{background:#ffedd5;color:#c2410c} .tag-b{background:#dbeafe;color:#1d4ed8}
+.tag-y{background:#fef9c3;color:#a16207} .tag-v{background:#ede9fe;color:#6d28d9}
+.tag-gray{background:var(--bg2);color:var(--t2)}
+/* ── FAB ─────────────────────────────────── */
+.fab{
+  position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));right:18px;
+  width:52px;height:52px;border-radius:50%;background:var(--p);color:#fff;
+  border:none;font-size:1.6rem;cursor:pointer;box-shadow:var(--sh2);
+  display:flex;align-items:center;justify-content:center;z-index:40;
+  transition:transform .15s,background .15s;
+}
+.fab:active{transform:scale(.93);background:var(--p2)}
+/* ── Search + sort bar ───────────────────── */
+.search-bar{display:flex;gap:8px;margin-bottom:10px}
+.search-wrap{flex:1;position:relative}
+.search-wrap .fi{padding-left:36px}
+.search-wrap .s-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t2);font-size:1rem}
+.sort-btn{
+  min-width:44px;height:44px;border-radius:var(--r2);border:1.5px solid var(--bd);
+  background:var(--card);color:var(--t2);cursor:pointer;font-size:.8rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:4px;padding:0 10px;
+  white-space:nowrap;transition:.15s;
+}
+.sort-btn:active{border-color:var(--p);color:var(--p)}
+/* ── Category pills ──────────────────────── */
+.pills{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill{
+  flex-shrink:0;padding:6px 14px;border-radius:20px;
+  border:1.5px solid var(--bd);background:var(--card);color:var(--t2);
+  font-size:.75rem;font-weight:700;cursor:pointer;transition:.15s;min-height:34px;
+}
+.pill.on{background:var(--p);color:#fff;border-color:var(--p)}
+/* ── Quick add ───────────────────────────── */
+.quick-add{display:flex;gap:8px;margin-bottom:14px}
+.quick-add .fi{flex:1}
+.quick-add button{
+  min-width:44px;height:44px;border-radius:var(--r2);border:none;
+  background:var(--p);color:#fff;font-size:1.3rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+/* ── Shop mode button ────────────────────── */
+.shop-mode-btn{
+  width:100%;margin-bottom:14px;border-radius:var(--r2);border:none;
+  background:linear-gradient(135deg,var(--p2),var(--p));color:#fff;
+  font-weight:700;font-size:.9rem;padding:13px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 2px 8px rgba(22,163,74,.35);transition:.15s;
+}
+.shop-mode-btn:active{opacity:.9}
+/* ── Swipe item ──────────────────────────── */
+.swipe-wrap{position:relative;margin-bottom:8px;border-radius:var(--r2);overflow:hidden}
+.swipe-bg{position:absolute;inset:0;display:flex;align-items:center;border-radius:var(--r2)}
+.swipe-bg-r{background:var(--p);padding-left:18px;justify-content:flex-start;color:#fff;font-weight:700;font-size:.85rem;gap:6px}
+.swipe-bg-l{background:var(--red);padding-right:18px;justify-content:flex-end;color:#fff;font-weight:700;font-size:.85rem;gap:6px}
+.item-card{
+  position:relative;z-index:1;
+  background:var(--card);border:1.5px solid var(--bd);border-radius:var(--r2);
+  display:flex;align-items:center;gap:12px;padding:12px;
+  transition:transform .2s ease,opacity .2s;
+  touch-action:pan-y;
+}
+.item-card.fly-r{transform:translateX(110%)!important;opacity:0}
+.item-card.fly-l{transform:translateX(-110%)!important;opacity:0}
+.item-card.pinned{border-left:3px solid var(--yellow)}
+/* ── Check circle ────────────────────────── */
+.chk{
+  width:26px;height:26px;border-radius:50%;flex-shrink:0;
+  border:2px solid var(--bd);background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:.2s;
+}
+.chk.on{background:var(--p);border-color:var(--p);animation:pop .25s ease}
+.chk.on::after{content:'✓';color:#fff;font-size:.85rem;font-weight:700}
+@keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+/* ── Item info ───────────────────────────── */
+.item-info{flex:1;min-width:0}
+.item-name{font-weight:700;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-meta{margin-top:3px;display:flex;flex-wrap:wrap;gap:4px}
+.item-actions{display:flex;gap:2px;flex-shrink:0}
+.act-btn{
+  width:34px;height:34px;border-radius:var(--r3);border:none;
+  background:transparent;cursor:pointer;font-size:1rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.act-btn:active{background:var(--bg2)}
+/* ── Prediction bar ──────────────────────── */
+.pred-bar{height:4px;border-radius:2px;background:var(--bd);margin-top:6px;overflow:hidden}
+.pred-fill{height:100%;border-radius:2px;transition:width .4s}
+/* ── Stats cards ─────────────────────────── */
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.stats-row.cols3{grid-template-columns:repeat(3,1fr)}
+.stat{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:14px;text-align:center}
+.stat-val{font-size:1.6rem;font-weight:800;line-height:1}
+.stat-lbl{font-size:.7rem;color:var(--t2);margin-top:3px}
+/* ── Budget bar ──────────────────────────── */
+.budget-bar{height:10px;border-radius:5px;background:var(--bg2);overflow:hidden;margin:10px 0 6px}
+.budget-fill{height:100%;border-radius:5px;transition:width .5s}
+/* ── Chart bars ──────────────────────────── */
+.chart-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.chart-lbl{width:90px;font-size:.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-track{flex:1;height:10px;background:var(--bg2);border-radius:5px;overflow:hidden}
+.chart-fill{height:100%;border-radius:5px;transition:width .5s}
+.chart-val{width:50px;text-align:right;font-size:.75rem;color:var(--t2);font-weight:600}
+/* ── History item ────────────────────────── */
+.hist-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd)}
+.hist-row:last-child{border:none}
+/* ── Empty state ─────────────────────────── */
+.empty{text-align:center;padding:48px 24px;color:var(--t2)}
+.empty-icon{font-size:3rem;opacity:.35;margin-bottom:12px}
+.empty p{font-size:.9rem;line-height:1.5}
+/* ── Section header ──────────────────────── */
+.sec-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.sec-hd span{font-size:.85rem;font-weight:700;color:var(--t2)}
+/* ── Shopping overlay ────────────────────── */
+#shopOverlay{
+  position:fixed;inset:0;z-index:200;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+#shopOverlay.open{transform:translateY(0)}
+.shop-header{
+  background:var(--p);padding:calc(14px + env(safe-area-inset-top)) 16px 14px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.shop-header-row{display:flex;justify-content:space-between;align-items:center;color:#fff}
+.shop-title{font-size:1.1rem;font-weight:800;color:#fff}
+.shop-progress-bar{height:5px;background:rgba(255,255,255,.3);border-radius:3px;overflow:hidden}
+.shop-progress-fill{height:100%;background:#fff;border-radius:3px;transition:width .3s}
+.shop-body{flex:1;overflow-y:auto;padding:14px}
+.shop-footer{
+  padding:14px 16px calc(16px + env(safe-area-inset-bottom));
+  background:var(--card);border-top:1px solid var(--bd);
+  display:flex;gap:10px;box-shadow:0 -2px 12px rgba(0,0,0,.08);
+}
+.shop-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 12px;border-radius:var(--r2);border:1.5px solid var(--bd);
+  background:var(--card);margin-bottom:8px;cursor:pointer;
+  transition:background .15s,border-color .15s;min-height:58px;
+}
+.shop-item.done{background:var(--p3);border-color:var(--p)}
+.shop-item.done .shop-item-name{text-decoration:line-through;opacity:.6}
+.shop-item-check{
+  width:28px;height:28px;border-radius:50%;border:2px solid var(--bd);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:.2s;
+}
+.shop-item.done .shop-item-check{background:var(--p);border-color:var(--p);color:#fff;animation:pop .25s ease}
+.shop-item-name{font-weight:700;font-size:1rem;flex:1}
+.shop-item-unit{font-size:.8rem;color:var(--t2)}
+.shop-cat-hd{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t2);margin:14px 0 6px;padding-left:4px}
+/* ── Modals (bottom sheets) ──────────────── */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.overlay.open{opacity:1;pointer-events:all}
+.sheet{
+  width:100%;max-width:600px;background:var(--card);
+  border-radius:20px 20px 0 0;
+  padding:20px 20px calc(22px + env(safe-area-inset-bottom));
+  max-height:92vh;overflow-y:auto;
+  transform:translateY(100%);transition:transform .25s ease;
+}
+.overlay.open .sheet{transform:translateY(0)}
+.sheet-handle{width:36px;height:4px;background:var(--bd);border-radius:2px;margin:0 auto 16px}
+.sheet-title{font-size:1.1rem;font-weight:800;margin-bottom:18px}
+.sheet-actions{display:flex;gap:8px;margin-top:18px}
+.sheet-actions .btn{flex:1}
+/* ── Toast ───────────────────────────────── */
+#toast{
+  position:fixed;bottom:calc(80px + env(safe-area-inset-bottom) + 12px);
+  left:50%;transform:translateX(-50%) translateY(12px);
+  background:#1e293b;color:#f1f5f9;
+  padding:11px 16px;border-radius:22px;
+  font-size:.875rem;font-weight:600;z-index:300;
+  opacity:0;pointer-events:none;transition:.2s;
+  display:flex;align-items:center;gap:10px;white-space:nowrap;
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all}
+#toastUndo{
+  background:var(--p);color:#fff;border:none;border-radius:12px;
+  padding:4px 10px;font-size:.78rem;font-weight:700;cursor:pointer;
+}
+/* ── Info box ────────────────────────────── */
+.info-box{
+  background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);
+  padding:12px;font-size:.82rem;color:var(--t2);line-height:1.5;margin-bottom:14px;
+}
+/* ── Divider ─────────────────────────────── */
+.divider{height:1px;background:var(--bd);margin:14px 0}
+/* ── Setting row ─────────────────────────── */
+.setting-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--bd)}
+.setting-row:last-child{border:none}
+.setting-label{font-weight:600;font-size:.9rem}
+.setting-sub{font-size:.75rem;color:var(--t2);margin-top:2px}
+/* ── Toggle switch ───────────────────────── */
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{
+  position:absolute;inset:0;background:var(--bd);border-radius:12px;cursor:pointer;
+  transition:.2s;
+}
+.toggle-slider::before{
+  content:'';position:absolute;width:18px;height:18px;
+  border-radius:50%;background:#fff;left:3px;top:3px;transition:.2s;
+}
+.toggle input:checked + .toggle-slider{background:var(--p)}
+.toggle input:checked + .toggle-slider::before{transform:translateX(20px)}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="header">
+  <div class="header-row">
+    <div>
+      <h1>🛒 SmartCart</h1>
+      <div class="header-sub" id="headerSub">Tu despensa inteligente</div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="toggleDark()" id="darkBtn" title="Modo oscuro">🌙</button>
+      <button class="icon-btn" onclick="openNotifSheet()" id="notifBtn" title="Alertas">
+        🔔<span class="notif-dot" id="notifDot"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<main>
+
+  <!-- TAB: LISTA -->
+  <div class="tab active" id="t-lista">
+    <button class="shop-mode-btn" onclick="enterShopMode()">
+      🛍️ Modo Compras — ir al supermercado
+    </button>
+    <div class="search-bar">
+      <div class="search-wrap">
+        <span class="s-icon">🔍</span>
+        <input class="fi" id="searchInput" placeholder="Buscar producto..." oninput="renderLista()"/>
+      </div>
+      <button class="sort-btn" id="sortBtn" onclick="cycleSort()">↕ <span id="sortLabel">Orden</span></button>
+    </div>
+    <div class="pills" id="catPills">
+      <button class="pill on" onclick="setCat('',this)">Todos</button>
+      <button class="pill" onclick="setCat('Lácteos',this)">🥛</button>
+      <button class="pill" onclick="setCat('Proteínas',this)">🥩</button>
+      <button class="pill" onclick="setCat('Frutas',this)">🍎</button>
+      <button class="pill" onclick="setCat('Verduras',this)">🥦</button>
+      <button class="pill" onclick="setCat('Granos',this)">🌾</button>
+      <button class="pill" onclick="setCat('Snacks',this)">🍿</button>
+      <button class="pill" onclick="setCat('Bebidas',this)">🧃</button>
+      <button class="pill" onclick="setCat('Limpieza',this)">🧹</button>
+      <button class="pill" onclick="setCat('Otros',this)">📦</button>
+    </div>
+    <div class="quick-add">
+      <input class="fi" id="quickInput" placeholder="Añadir rápido (Enter)..." onkeydown="if(event.key==='Enter')quickAdd()"/>
+      <button onclick="quickAdd()">+</button>
+    </div>
+    <div id="listaContainer"></div>
+  </div>
+
+  <!-- TAB: DESPENSA -->
+  <div class="tab" id="t-despensa">
+    <div id="despensaContainer"></div>
+  </div>
+
+  <!-- TAB: STATS -->
+  <div class="tab" id="t-stats">
+    <div id="statsContainer"></div>
+  </div>
+
+  <!-- TAB: CONFIG -->
+  <div class="tab" id="t-config">
+    <div class="card">
+      <div class="card-label">Presupuesto mensual</div>
+      <div class="fg">
+        <label class="fl">Presupuesto del mes</label>
+        <div style="display:flex;gap:8px">
+          <select class="fs" id="cfgCurrency" style="width:100px" onchange="saveConfig()">
+            <option value="$">$ USD</option>
+            <option value="COP">COP</option>
+            <option value="€">€ EUR</option>
+            <option value="MXN">MXN</option>
+          </select>
+          <input class="fi" type="number" id="cfgBudget" placeholder="0" min="0" oninput="saveConfig()"/>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Notificaciones</div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Días de anticipación</div>
+          <div class="setting-sub">Avisar antes de que se acabe un producto</div>
+        </div>
+        <select class="fs" id="cfgDays" style="width:110px" onchange="saveConfig()">
+          <option value="1">1 día</option>
+          <option value="2" selected>2 días</option>
+          <option value="3">3 días</option>
+        </select>
+      </div>
+      <div style="margin-top:10px">
+        <button class="btn btn-blue btn-full btn-sm" onclick="askNotifPermission()">
+          🔔 Activar notificaciones
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Apariencia</div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Modo oscuro</div>
+          <div class="setting-sub">Seguir configuración del sistema</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="darkToggle" onchange="onDarkToggle()"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Datos</div>
+      <button class="btn btn-ghost btn-full btn-sm" onclick="exportData()" style="margin-bottom:8px">
+        📥 Exportar datos (JSON)
+      </button>
+      <button class="btn btn-ghost btn-full btn-sm" onclick="importData()" style="margin-bottom:8px">
+        📤 Importar datos (JSON)
+      </button>
+      <button class="btn btn-red btn-full btn-sm" onclick="clearData()">
+        🗑️ Borrar todos los datos
+      </button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="onImportFile(event)"/>
+    </div>
+    <div class="info-box">
+      💡 SmartCart funciona sin conexión. Instálala desde el menú de tu navegador para acceso rápido.
+    </div>
+  </div>
+</main>
+
+<!-- ── FAB ── -->
+<button class="fab" id="fab" onclick="openAddSheet()">+</button>
+
+<!-- ── BOTTOM NAV ── -->
+<nav>
+  <button class="active" id="nav-lista" onclick="goTab('lista',this)">
+    <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+    Lista
+  </button>
+  <button id="nav-despensa" onclick="goTab('despensa',this)">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Despensa
+  </button>
+  <button id="nav-stats" onclick="goTab('stats',this)">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Stats
+  </button>
+  <button id="nav-config" onclick="goTab('config',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Config
+  </button>
+</nav>
+
+<!-- ── SHOPPING MODE OVERLAY ── -->
+<div id="shopOverlay">
+  <div class="shop-header">
+    <div class="shop-header-row">
+      <span class="shop-title">🛍️ Modo Compras</span>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:.9rem;font-weight:700;opacity:.9" id="shopCount">0/0</span>
+        <button onclick="exitShopMode()" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+    </div>
+    <div class="shop-progress-bar"><div class="shop-progress-fill" id="shopFill" style="width:0%"></div></div>
+  </div>
+  <div class="shop-body" id="shopBody"></div>
+  <div class="shop-footer">
+    <button class="btn btn-ghost" style="flex:1" onclick="exitShopMode()">Cancelar</button>
+    <button class="btn btn-p" style="flex:2" id="shopFinishBtn" onclick="finishShopping()">Finalizar compra</button>
+  </div>
+</div>
+
+<!-- ── SHEET: ADD/EDIT ── -->
+<div class="overlay" id="addOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="addTitle">Agregar producto</div>
+    <div class="fg">
+      <label class="fl">Nombre *</label>
+      <input class="fi" id="pName" placeholder="Ej: Leche entera, Arroz..."/>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label class="fl">Categoría</label>
+        <select class="fs" id="pCat">
+          <option value="Lácteos">🥛 Lácteos</option>
+          <option value="Proteínas">🥩 Proteínas</option>
+          <option value="Frutas">🍎 Frutas</option>
+          <option value="Verduras">🥦 Verduras</option>
+          <option value="Granos">🌾 Granos</option>
+          <option value="Snacks">🍿 Snacks</option>
+          <option value="Bebidas">🧃 Bebidas</option>
+          <option value="Limpieza">🧹 Limpieza</option>
+          <option value="Otros">📦 Otros</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">Unidad</label>
+        <select class="fs" id="pUnit">
+          <option value="unidad">Unidad</option>
+          <option value="kg">Kg</option>
+          <option value="litro">Litro</option>
+          <option value="paquete">Paquete</option>
+          <option value="docena">Docena</option>
+          <option value="lata">Lata</option>
+          <option value="bolsa">Bolsa</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Notas (opcional)</label>
+      <input class="fi" id="pNotes" placeholder="Marca preferida, presentación..."/>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn btn-ghost" onclick="closeSheet('addOverlay')">Cancelar</button>
+      <button class="btn btn-p" id="addSaveBtn" onclick="saveProduct()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SHEET: PURCHASE ── -->
+<div class="overlay" id="buyOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">✅ Registrar compra</div>
+    <p style="font-size:.88rem;color:var(--t2);margin-bottom:16px" id="buyProductLabel"></p>
+    <div class="frow">
+      <div class="fg">
+        <label class="fl">Precio pagado</label>
+        <input class="fi" type="number" id="buyPrice" placeholder="0.00" min="0" step="0.01"/>
+      </div>
+      <div class="fg">
+        <label class="fl">Moneda</label>
+        <select class="fs" id="buyCurrency">
+          <option value="$">$ USD</option>
+          <option value="COP">COP</option>
+          <option value="€">€ EUR</option>
+          <option value="MXN">MXN</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Tienda / Lugar</label>
+      <input class="fi" id="buyStore" placeholder="Éxito, Carulla, Mercado..."/>
+    </div>
+    <div class="fg">
+      <label class="fl">Fecha</label>
+      <input class="fi" type="date" id="buyDate"/>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn btn-ghost" onclick="closeSheet('buyOverlay')">Cancelar</button>
+      <button class="btn btn-p" onclick="confirmBuy()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SHEET: BULK PURCHASE (shopping mode) ── -->
+<div class="overlay" id="bulkOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">🛒 Finalizar compra</div>
+    <p style="font-size:.88rem;color:var(--t2);margin-bottom:14px" id="bulkCount"></p>
+    <div class="fg">
+      <label class="fl">Tienda / Lugar de compra</label>
+      <input class="fi" id="bulkStore" placeholder="Éxito, Carulla, Mercado..."/>
+    </div>
+    <div class="fg">
+      <label class="fl">Fecha</label>
+      <input class="fi" type="date" id="bulkDate"/>
+    </div>
+    <div id="bulkItems" style="margin-bottom:4px"></div>
+    <div class="sheet-actions">
+      <button class="btn btn-ghost" onclick="closeSheet('bulkOverlay')">Cancelar</button>
+      <button class="btn btn-p" onclick="confirmBulkBuy()">Guardar todo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SHEET: RAN OUT ── -->
+<div class="overlay" id="ranOutOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">📦 ¿Se acabó?</div>
+    <p style="font-size:.9rem;margin-bottom:12px" id="ranOutLabel"></p>
+    <div id="ranOutInfo" style="margin-bottom:14px"></div>
+    <p style="font-size:.82rem;color:var(--t2)">Se registrará cuántos días duró y volverá a la lista de compras.</p>
+    <div class="sheet-actions">
+      <button class="btn btn-ghost" onclick="closeSheet('ranOutOverlay')">Cancelar</button>
+      <button class="btn btn-red" onclick="confirmRanOut()">Sí, se acabó</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SHEET: NOTIFICATIONS ── -->
+<div class="overlay" id="notifOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">🔔 Alertas</div>
+    <div id="notifList"></div>
+    <div style="margin-top:14px">
+      <button class="btn btn-ghost btn-full" onclick="closeSheet('notifOverlay')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast">
+  <span id="toastMsg"></span>
+  <button id="toastUndo" style="display:none" onclick="doUndo()">Deshacer</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+const S = {
+  products: [],
+  settings: { budget: 0, currency: '$', notifyDays: 2, darkMode: 'auto' },
+  ui: { cat: '', sort: 'default', editId: null, buyId: null, ranOutId: null },
+  shopChecked: new Set()
+};
+
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem('sc3') || '{}');
+    if (d.products) S.products = d.products;
+    if (d.settings) S.settings = { ...S.settings, ...d.settings };
+  } catch(e) {}
+}
+function save() { localStorage.setItem('sc3', JSON.stringify({ products: S.products, settings: S.settings })); }
+
+// ═══════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
+const today = () => new Date().toISOString().split('T')[0];
+const daysBetween = (a, b) => Math.round(Math.abs(new Date(b) - new Date(a)) / 864e5);
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x.toISOString().split('T')[0]; };
+const fmtDate = d => d ? new Date(d+'T12:00').toLocaleDateString('es',{day:'numeric',month:'short'}) : '';
+const fmtMoney = (v, c) => v ? `${c||'$'}${parseFloat(v).toLocaleString('es')}` : '';
+const catEmoji = c => ({Lácteos:'🥛',Proteínas:'🥩',Frutas:'🍎',Verduras:'🥦',Granos:'🌾',Snacks:'🍿',Bebidas:'🧃',Limpieza:'🧹',Otros:'📦'}[c]||'📦');
+const catColor = c => ({Lácteos:'tag-b',Proteínas:'tag-r',Frutas:'tag-o',Verduras:'tag-g',Granos:'tag-y',Snacks:'tag-v',Bebidas:'tag-b',Limpieza:'tag-g',Otros:'tag-gray'}[c]||'tag-gray');
+
+function avgDays(p) {
+  const done = (p.cycles||[]).filter(c=>c.ranOutDate&&c.purchasedDate);
+  if (done.length < 3) return null;
+  return Math.round(done.reduce((s,c)=>s+daysBetween(c.purchasedDate,c.ranOutDate),0)/done.length);
+}
+function predictedRunOut(p) {
+  const avg = avgDays(p); if (!avg || !p.cur?.purchasedDate) return null;
+  return addDays(p.cur.purchasedDate, avg);
+}
+function daysLeft(p) {
+  const pred = predictedRunOut(p); if (!pred) return null;
+  const diff = daysBetween(today(), pred);
+  return new Date(pred) >= new Date(today()) ? diff : -diff;
+}
+
+// ═══════════════════════════════════════════════════════
+//  DARK MODE
+// ═══════════════════════════════════════════════════════
+function applyTheme(mode) {
+  const dark = mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme:dark)').matches);
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.getElementById('metaTheme').content = dark ? '#0f172a' : '#16a34a';
+  document.getElementById('darkBtn').textContent = dark ? '☀️' : '🌙';
+  document.getElementById('darkToggle').checked = (mode === 'dark' || dark);
+}
+function toggleDark() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  S.settings.darkMode = cur === 'dark' ? 'light' : 'dark';
+  applyTheme(S.settings.darkMode);
+  save();
+}
+function onDarkToggle() {
+  S.settings.darkMode = document.getElementById('darkToggle').checked ? 'dark' : 'light';
+  applyTheme(S.settings.darkMode);
+  save();
+}
+
+// ═══════════════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════════════
+let curTab = 'lista';
+function goTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('t-'+name).classList.add('active');
+  (btn || document.getElementById('nav-'+name)).classList.add('active');
+  document.getElementById('fab').style.display = name === 'lista' ? 'flex' : 'none';
+  curTab = name;
+  if (name==='lista') renderLista();
+  if (name==='despensa') renderDespensa();
+  if (name==='stats') renderStats();
+  if (name==='config') loadConfig();
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOAST & UNDO
+// ═══════════════════════════════════════════════════════
+let toastTimer, undoFn;
+function toast(msg, undoCb) {
+  clearTimeout(toastTimer);
+  document.getElementById('toastMsg').textContent = msg;
+  const uBtn = document.getElementById('toastUndo');
+  if (undoCb) { undoFn = undoCb; uBtn.style.display=''; }
+  else { undoFn = null; uBtn.style.display='none'; }
+  document.getElementById('toast').classList.add('show');
+  toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), undoCb ? 4500 : 2500);
+}
+function doUndo() {
+  if (undoFn) { undoFn(); undoFn = null; }
+  document.getElementById('toast').classList.remove('show');
+  clearTimeout(toastTimer);
+}
+
+// ═══════════════════════════════════════════════════════
+//  SHEETS
+// ═══════════════════════════════════════════════════════
+function openSheet(id) { document.getElementById(id).classList.add('open'); }
+function closeSheet(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
+
+// ═══════════════════════════════════════════════════════
+//  NOTIFICATIONS
+// ═══════════════════════════════════════════════════════
+function getAlerts() {
+  const days = parseInt(S.settings.notifyDays)||2;
+  return S.products.filter(p => p.status==='active' && daysLeft(p)!==null && daysLeft(p)<=days && daysLeft(p)>=0);
+}
+function updateNotifBadge() {
+  const a = getAlerts(); const dot = document.getElementById('notifDot');
+  dot.style.display = a.length ? 'flex' : 'none';
+  if (a.length) dot.textContent = a.length;
+}
+function openNotifSheet() {
+  const alerts = getAlerts();
+  const list = document.getElementById('notifList');
+  if (!alerts.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">✅</div><p>Sin alertas por ahora</p></div>';
+  } else {
+    list.innerHTML = alerts.map(p => {
+      const l = daysLeft(p);
+      return `<div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--r2);background:#fff7ed;border:1px solid #fed7aa;margin-bottom:8px">
+        <span style="font-size:1.5rem">${catEmoji(p.category)}</span>
+        <div><div style="font-weight:700">${p.name}</div>
+        <div><span class="tag tag-o">⏰ ${l===0?'Se acaba hoy':`Faltan ${l} día${l>1?'s':''}`}</span></div></div>
+      </div>`;
+    }).join('');
+  }
+  openSheet('notifOverlay');
+}
+async function askNotifPermission() {
+  if (!('Notification' in window)) { toast('⚠️ No soportado en este navegador'); return; }
+  const p = await Notification.requestPermission();
+  toast(p==='granted' ? '✅ Notificaciones activadas' : '❌ Permiso denegado');
+}
+
+// ═══════════════════════════════════════════════════════
+//  PRODUCT CRUD
+// ═══════════════════════════════════════════════════════
+function openAddSheet(id) {
+  S.ui.editId = id||null;
+  const isEdit = !!id;
+  document.getElementById('addTitle').textContent = isEdit ? 'Editar producto' : 'Agregar producto';
+  document.getElementById('addSaveBtn').textContent = isEdit ? 'Guardar' : 'Agregar';
+  if (isEdit) {
+    const p = S.products.find(x=>x.id===id);
+    document.getElementById('pName').value = p.name;
+    document.getElementById('pCat').value = p.category;
+    document.getElementById('pUnit').value = p.unit;
+    document.getElementById('pNotes').value = p.notes||'';
+  } else {
+    document.getElementById('pName').value='';
+    document.getElementById('pNotes').value='';
+  }
+  openSheet('addOverlay');
+  setTimeout(()=>document.getElementById('pName').focus(),300);
+}
+function saveProduct() {
+  const name = document.getElementById('pName').value.trim();
+  if (!name) { toast('⚠️ Ingresa el nombre'); return; }
+  if (S.ui.editId) {
+    const p = S.products.find(x=>x.id===S.ui.editId);
+    Object.assign(p,{name,category:document.getElementById('pCat').value,unit:document.getElementById('pUnit').value,notes:document.getElementById('pNotes').value.trim()});
+    toast('✏️ Producto actualizado');
+  } else {
+    S.products.push({id:uid(),name,status:'needed',category:document.getElementById('pCat').value,unit:document.getElementById('pUnit').value,notes:document.getElementById('pNotes').value.trim(),cycles:[],cur:null,pinned:false});
+    toast('✅ '+name+' agregado');
+  }
+  save(); closeSheet('addOverlay');
+  if(curTab==='lista') renderLista();
+  if(curTab==='despensa') renderDespensa();
+  updateNotifBadge();
+}
+function quickAdd() {
+  const inp = document.getElementById('quickInput');
+  const name = inp.value.trim(); if(!name) return;
+  S.products.push({id:uid(),name,status:'needed',category:'Otros',unit:'unidad',notes:'',cycles:[],cur:null,pinned:false});
+  save(); inp.value=''; renderLista();
+  toast('✅ '+name+' agregado');
+}
+function deleteProduct(id) {
+  const idx = S.products.findIndex(p=>p.id===id);
+  const snap = JSON.parse(JSON.stringify(S.products[idx]));
+  S.products.splice(idx,1);
+  save();
+  if(curTab==='lista') renderLista();
+  if(curTab==='despensa') renderDespensa();
+  updateNotifBadge();
+  toast('🗑️ Eliminado', () => {
+    S.products.splice(idx,0,snap); save();
+    if(curTab==='lista') renderLista();
+    if(curTab==='despensa') renderDespensa();
+    updateNotifBadge();
+  });
+}
+function togglePin(id) {
+  const p = S.products.find(x=>x.id===id);
+  p.pinned = !p.pinned; save(); renderLista();
+}
+
+// ═══════════════════════════════════════════════════════
+//  PURCHASE FLOW
+// ═══════════════════════════════════════════════════════
+function openBuySheet(id) {
+  S.ui.buyId = id;
+  const p = S.products.find(x=>x.id===id);
+  document.getElementById('buyProductLabel').textContent = `${catEmoji(p.category)} ${p.name} (${p.unit})`;
+  document.getElementById('buyPrice').value='';
+  document.getElementById('buyStore').value='';
+  document.getElementById('buyDate').value=today();
+  document.getElementById('buyCurrency').value=S.settings.currency||'$';
+  openSheet('buyOverlay');
+}
+function confirmBuy() {
+  const p = S.products.find(x=>x.id===S.ui.buyId); if(!p) return;
+  const cost = parseFloat(document.getElementById('buyPrice').value)||null;
+  p.status='active';
+  p.cur = {
+    purchasedDate: document.getElementById('buyDate').value||today(),
+    cost, currency: document.getElementById('buyCurrency').value,
+    store: document.getElementById('buyStore').value.trim()||null
+  };
+  save(); closeSheet('buyOverlay');
+  renderLista(); renderDespensa(); updateNotifBadge();
+  toast('✅ '+p.name+' comprado');
+}
+
+// ═══════════════════════════════════════════════════════
+//  RAN OUT FLOW
+// ═══════════════════════════════════════════════════════
+function openRanOutSheet(id) {
+  S.ui.ranOutId = id;
+  const p = S.products.find(x=>x.id===id);
+  document.getElementById('ranOutLabel').innerHTML=`<strong>${p.name}</strong> — comprado el ${fmtDate(p.cur?.purchasedDate)}`;
+  const days = p.cur?.purchasedDate ? daysBetween(p.cur.purchasedDate,today()) : null;
+  const avg = avgDays(p);
+  document.getElementById('ranOutInfo').innerHTML = days!==null ? `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;background:var(--bg2);border-radius:var(--r2)">
+      <div style="text-align:center"><div style="font-size:1.6rem;font-weight:800">${days}</div><div style="font-size:.7rem;color:var(--t2)">días duró</div></div>
+      ${avg?`<div style="text-align:center"><div style="font-size:1.6rem;font-weight:800">${avg}</div><div style="font-size:.7rem;color:var(--t2)">días promedio</div></div>`:'<div style="text-align:center"><div style="font-size:.8rem;color:var(--t2);margin-top:8px">Faltan ${3-Math.min(3,p.cycles.length)} ciclos para predecir</div></div>'}
+    </div>` : '';
+  openSheet('ranOutOverlay');
+}
+function confirmRanOut() {
+  const p = S.products.find(x=>x.id===S.ui.ranOutId); if(!p||!p.cur) return;
+  p.cycles.push({...p.cur, ranOutDate:today(), daysLasted:daysBetween(p.cur.purchasedDate,today())});
+  p.cur=null; p.status='needed';
+  const avg = avgDays(p);
+  if(avg) toast(`📊 ${p.name} dura ~${avg} días en promedio`);
+  save(); closeSheet('ranOutOverlay');
+  renderDespensa(); renderLista(); updateNotifBadge();
+}
+
+// ═══════════════════════════════════════════════════════
+//  SORT & FILTER
+// ═══════════════════════════════════════════════════════
+const SORTS = ['default','az','cat','most'];
+const SORT_LABELS = {default:'Orden',az:'A–Z',cat:'Categ.',most:'+ Usado'};
+function cycleSort() {
+  const i = SORTS.indexOf(S.ui.sort);
+  S.ui.sort = SORTS[(i+1)%SORTS.length];
+  document.getElementById('sortLabel').textContent = SORT_LABELS[S.ui.sort];
+  renderLista();
+}
+function setCat(cat, btn) {
+  S.ui.cat = cat;
+  document.querySelectorAll('.pill').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderLista();
+}
+function sortProducts(arr) {
+  const sorted = [...arr];
+  if (S.ui.sort==='az') sorted.sort((a,b)=>a.name.localeCompare(b.name));
+  else if (S.ui.sort==='cat') sorted.sort((a,b)=>a.category.localeCompare(b.category));
+  else if (S.ui.sort==='most') sorted.sort((a,b)=>(b.cycles.length)-(a.cycles.length));
+  // Always put pinned first
+  return [...sorted.filter(p=>p.pinned), ...sorted.filter(p=>!p.pinned)];
+}
+
+// ═══════════════════════════════════════════════════════
+//  SWIPE GESTURES
+// ═══════════════════════════════════════════════════════
+function setupSwipe(wrap, onRight, onLeft) {
+  let sx, sy, dragging=false, dx=0, started=false;
+  const card = wrap.querySelector('.item-card');
+  const THRESH = 75;
+  wrap.addEventListener('touchstart', e => {
+    sx=e.touches[0].clientX; sy=e.touches[0].clientY;
+    dragging=true; started=false; dx=0;
+  },{passive:true});
+  wrap.addEventListener('touchmove', e => {
+    if(!dragging) return;
+    dx = e.touches[0].clientX - sx;
+    const dy = e.touches[0].clientY - sy;
+    if (!started && Math.abs(dy) > Math.abs(dx)+5) { dragging=false; return; }
+    started=true;
+    card.style.transition='none';
+    card.style.transform=`translateX(${Math.max(-130,Math.min(130,dx))}px)`;
+  },{passive:true});
+  wrap.addEventListener('touchend', () => {
+    if(!dragging||!started){dragging=false;return;}
+    dragging=false; started=false;
+    card.style.transition='';
+    if(dx>THRESH){card.classList.add('fly-r');setTimeout(onRight,180);}
+    else if(dx<-THRESH){card.classList.add('fly-l');setTimeout(onLeft,180);}
+    else{card.style.transform='';}
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER: LISTA
+// ═══════════════════════════════════════════════════════
+function renderLista() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let products = S.products.filter(p => p.status==='needed');
+  if (S.ui.cat) products = products.filter(p=>p.category===S.ui.cat);
+  if (q) products = products.filter(p=>p.name.toLowerCase().includes(q)||p.notes?.toLowerCase().includes(q));
+  products = sortProducts(products);
+
+  const container = document.getElementById('listaContainer');
+  if (!products.length) {
+    container.innerHTML=`<div class="empty"><div class="empty-icon">🛒</div><p>${q?'Sin resultados para "'+q+'"':'Lista vacía.<br>Toca <strong>+</strong> para agregar o usa el campo rápido.'}</p></div>`;
+    return;
+  }
+  container.innerHTML = products.map(p => productItem(p,'lista')).join('');
+  products.forEach(p => {
+    const wrap = document.getElementById('sw-'+p.id);
+    if(wrap) setupSwipe(wrap, ()=>openBuySheet(p.id), ()=>deleteProduct(p.id));
+  });
+  // Update header subtitle
+  document.getElementById('headerSub').textContent = `${products.length} producto${products.length!==1?'s':''} por comprar`;
+}
+
+function productItem(p, ctx) {
+  const avg = avgDays(p);
+  const cycles = p.cycles.length;
+  const lastCycle = cycles>0 ? p.cycles[cycles-1] : null;
+  return `<div class="swipe-wrap" id="sw-${p.id}">
+    <div class="swipe-bg swipe-bg-r">🛒 Comprado</div>
+    <div class="swipe-bg swipe-bg-l">🗑️ Eliminar</div>
+    <div class="item-card${p.pinned?' pinned':''}">
+      <div class="chk" onclick="openBuySheet('${p.id}')"></div>
+      <div class="item-info">
+        <div class="item-name">${catEmoji(p.category)} ${p.name} <span style="font-weight:400;font-size:.78rem;color:var(--t2)">(${p.unit})</span></div>
+        <div class="item-meta">
+          ${cycles>0?`<span class="tag tag-gray">🔄 ${cycles} compra${cycles>1?'s':''}</span>`:''}
+          ${avg?`<span class="tag tag-g">⏱ ~${avg} días</span>`:''}
+          ${lastCycle?.cost?`<span class="tag tag-gray">💰 ${fmtMoney(lastCycle.cost,lastCycle.currency)}${lastCycle.store?' · '+lastCycle.store:''}</span>`:''}
+          ${p.notes?`<span style="font-size:.72rem;color:var(--t2);font-style:italic">${p.notes}</span>`:''}
+        </div>
+      </div>
+      <div class="item-actions">
+        <button class="act-btn" onclick="togglePin('${p.id}')" title="${p.pinned?'Desfijar':'Fijar arriba'}">${p.pinned?'📌':'📍'}</button>
+        <button class="act-btn" onclick="openAddSheet('${p.id}')" title="Editar">✏️</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER: DESPENSA
+// ═══════════════════════════════════════════════════════
+function renderDespensa() {
+  const products = S.products.filter(p=>p.status==='active');
+  const container = document.getElementById('despensaContainer');
+  const alerts = getAlerts().length;
+  if (!products.length) {
+    container.innerHTML=`<div class="empty"><div class="empty-icon">🏠</div><p>Despensa vacía.<br>Marca productos como comprados desde la lista.</p></div>`;
+    return;
+  }
+  const sorted = [...products].sort((a,b)=>{
+    const da=daysLeft(a),db=daysLeft(b);
+    if(da===null&&db===null)return 0;
+    if(da===null)return 1; if(db===null)return -1;
+    return da-db;
+  });
+  const html = `
+    <div class="stats-row cols3">
+      <div class="stat"><div class="stat-val" style="color:var(--p)">${products.length}</div><div class="stat-lbl">En despensa</div></div>
+      <div class="stat"><div class="stat-val" style="color:var(--orange)">${alerts}</div><div class="stat-lbl">Por acabarse</div></div>
+      <div class="stat"><div class="stat-val" style="color:var(--blue)">${S.products.filter(p=>p.status==='needed').length}</div><div class="stat-lbl">Por comprar</div></div>
+    </div>
+    ${sorted.map(p=>pantryItem(p)).join('')}
+  `;
+  container.innerHTML = html;
+  sorted.forEach(p => {
+    const wrap = document.getElementById('sw-'+p.id);
+    if(wrap) setupSwipe(wrap, ()=>openRanOutSheet(p.id), ()=>deleteProduct(p.id));
+  });
+}
+
+function pantryItem(p) {
+  const avg = avgDays(p);
+  const left = daysLeft(p);
+  const pred = predictedRunOut(p);
+  const cycles = p.cycles.length;
+  let cls='', leftTag='';
+  if(left!==null){
+    if(left<=0){cls='';leftTag=`<span class="tag tag-r">⚠️ Debería haberse acabado</span>`;}
+    else if(left<=(parseInt(S.settings.notifyDays)||2)){cls='';leftTag=`<span class="tag tag-o">⏰ Faltan ${left} día${left>1?'s':''}</span>`;}
+    else{leftTag=`<span class="tag tag-g">✅ Faltan ${left} días</span>`;}
+  }
+  const progress = avg&&p.cur?.purchasedDate ? Math.min(100,Math.round(daysBetween(p.cur.purchasedDate,today())/avg*100)) : null;
+  const barColor = !progress ? 'var(--p)' : progress>=90?'var(--red)':progress>=65?'var(--orange)':'var(--p)';
+  return `<div class="swipe-wrap" id="sw-${p.id}">
+    <div class="swipe-bg swipe-bg-r">📦 Se acabó</div>
+    <div class="swipe-bg swipe-bg-l">🗑️ Eliminar</div>
+    <div class="item-card">
+      <div class="chk on" onclick="openRanOutSheet('${p.id}')"></div>
+      <div class="item-info">
+        <div class="item-name">${catEmoji(p.category)} ${p.name}</div>
+        <div class="item-meta" style="margin:4px 0">
+          ${leftTag}
+          ${p.cur?.cost?`<span class="tag tag-gray">💰 ${fmtMoney(p.cur.cost,p.cur.currency)}${p.cur.store?' · '+p.cur.store:''}</span>`:''}
+        </div>
+        <div class="item-meta">
+          <span style="font-size:.72rem;color:var(--t2)">Comprado: ${fmtDate(p.cur?.purchasedDate)}</span>
+          ${pred?`<span style="font-size:.72rem;color:var(--t2)"> · Estimado: ${fmtDate(pred)}</span>`:''}
+          ${!avg&&cycles<3?`<span style="font-size:.72rem;color:var(--t2)"> · ${3-cycles} ciclos para predecir</span>`:''}
+        </div>
+        ${progress!==null?`<div class="pred-bar"><div class="pred-fill" style="width:${progress}%;background:${barColor}"></div></div>`:''}
+      </div>
+      <div class="item-actions">
+        <button class="act-btn" onclick="openRanOutSheet('${p.id}')" title="Se acabó">📦</button>
+        <button class="act-btn" onclick="openAddSheet('${p.id}')" title="Editar">✏️</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER: STATS
+// ═══════════════════════════════════════════════════════
+function renderStats() {
+  const now = new Date();
+  const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const currency = S.settings.currency||'$';
+  const budget = parseFloat(S.settings.budget)||0;
+
+  // Monthly spending (purchases in current month)
+  let monthSpend = 0;
+  S.products.forEach(p => {
+    [...p.cycles, ...(p.cur?[p.cur]:[])].forEach(c => {
+      if(c.purchasedDate?.startsWith(monthKey) && c.cost) monthSpend += parseFloat(c.cost);
+    });
+  });
+
+  // Total spending all time
+  let totalSpend = 0;
+  S.products.forEach(p => {
+    [...p.cycles, ...(p.cur?[p.cur]:[])].forEach(c => { if(c.cost) totalSpend += parseFloat(c.cost); });
+  });
+
+  // By category
+  const byCat = {};
+  S.products.forEach(p => {
+    [...p.cycles, ...(p.cur?[p.cur]:[])].forEach(c => {
+      if(c.cost) byCat[p.category] = (byCat[p.category]||0)+parseFloat(c.cost);
+    });
+  });
+  const catEntries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const maxCat = catEntries[0]?.[1]||1;
+
+  // Most consumed products
+  const mostConsumed = [...S.products].filter(p=>p.cycles.length>0).sort((a,b)=>b.cycles.length-a.cycles.length).slice(0,5);
+
+  // Budget bar
+  const budgetPct = budget>0 ? Math.min(100,Math.round(monthSpend/budget*100)) : 0;
+  const budgetColor = budgetPct>=90?'var(--red)':budgetPct>=70?'var(--orange)':'var(--p)';
+
+  const container = document.getElementById('statsContainer');
+  if (!S.products.some(p=>p.cycles.length>0||p.cur)) {
+    container.innerHTML=`<div class="empty"><div class="empty-icon">📊</div><p>Sin datos todavía.<br>Los stats aparecerán después de registrar compras.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="stats-row">
+      <div class="stat"><div class="stat-val" style="color:var(--p);font-size:1.3rem">${currency}${monthSpend.toLocaleString('es',{maximumFractionDigits:0})}</div><div class="stat-lbl">Este mes</div></div>
+      <div class="stat"><div class="stat-val" style="color:var(--blue);font-size:1.3rem">${currency}${totalSpend.toLocaleString('es',{maximumFractionDigits:0})}</div><div class="stat-lbl">Total histórico</div></div>
+    </div>
+
+    ${budget>0?`
+    <div class="card">
+      <div class="card-label">Presupuesto del mes</div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+        <span style="font-size:1.1rem;font-weight:800">${currency}${monthSpend.toLocaleString('es',{maximumFractionDigits:0})}</span>
+        <span style="font-size:.8rem;color:var(--t2)">de ${currency}${budget.toLocaleString('es')} (${budgetPct}%)</span>
+      </div>
+      <div class="budget-bar"><div class="budget-fill" style="width:${budgetPct}%;background:${budgetColor}"></div></div>
+      ${budgetPct>=90?`<div style="font-size:.78rem;color:var(--red);margin-top:6px;font-weight:600">⚠️ Cerca del límite del presupuesto</div>`:`<div style="font-size:.78rem;color:var(--t2);margin-top:6px">Restante: ${currency}${Math.max(0,budget-monthSpend).toLocaleString('es',{maximumFractionDigits:0})}</div>`}
+    </div>`:''}
+
+    ${catEntries.length?`
+    <div class="card">
+      <div class="card-label">Gasto por categoría</div>
+      ${catEntries.map(([cat,amt])=>`
+        <div class="chart-row">
+          <div class="chart-lbl">${catEmoji(cat)} ${cat}</div>
+          <div class="chart-track"><div class="chart-fill" style="width:${Math.round(amt/maxCat*100)}%;background:var(--p)"></div></div>
+          <div class="chart-val">${currency}${amt.toLocaleString('es',{maximumFractionDigits:0})}</div>
+        </div>`).join('')}
+    </div>`:''}
+
+    ${mostConsumed.length?`
+    <div class="card">
+      <div class="card-label">Productos más consumidos</div>
+      ${mostConsumed.map((p,i)=>{
+        const avg = avgDays(p);
+        const totalCost = p.cycles.reduce((s,c)=>s+(c.cost||0),0);
+        return `<div class="hist-row">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:1.2rem;width:24px;text-align:center">${catEmoji(p.category)}</span>
+            <div>
+              <div style="font-weight:700;font-size:.9rem">${p.name}</div>
+              <div style="font-size:.72rem;color:var(--t2)">${avg?`~${avg} días de duración`:''}</div>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div><span class="tag tag-b">${p.cycles.length} compra${p.cycles.length>1?'s':''}</span></div>
+            ${totalCost?`<div style="font-size:.72rem;color:var(--t2);margin-top:3px">${currency}${totalCost.toLocaleString('es',{maximumFractionDigits:0})} total</div>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`:''}
+
+    ${S.products.filter(p=>p.cycles.length>=2).length?`
+    <div class="card">
+      <div class="card-label">Historial por producto</div>
+      ${S.products.filter(p=>p.cycles.length>0).map(p=>`
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-weight:700;font-size:.9rem">${catEmoji(p.category)} ${p.name}</span>
+            ${avgDays(p)?`<span class="tag tag-g">~${avgDays(p)} días</span>`:p.cycles.length<3?`<span class="tag tag-gray">${3-p.cycles.length} más para predecir</span>`:''}
+          </div>
+          ${p.cycles.slice(-4).reverse().map((c,i)=>`
+            <div class="hist-row" style="padding:6px 0">
+              <div style="font-size:.8rem">
+                <div style="font-weight:600">${fmtDate(c.purchasedDate)}${c.ranOutDate?' → '+fmtDate(c.ranOutDate):''}</div>
+                <div style="color:var(--t2)">${c.store||''}</div>
+              </div>
+              <div style="text-align:right;font-size:.78rem">
+                ${c.daysLasted?`<div style="font-weight:700">${c.daysLasted} días</div>`:''}
+                ${c.cost?`<div style="color:var(--t2)">${fmtMoney(c.cost,c.currency)}</div>`:''}
+              </div>
+            </div>`).join('')}
+        </div>`).join('')}
+    </div>`:''}
+  `;
+}
+
+// ═══════════════════════════════════════════════════════
+//  SHOPPING MODE
+// ═══════════════════════════════════════════════════════
+function enterShopMode() {
+  const needed = S.products.filter(p=>p.status==='needed');
+  if(!needed.length){toast('✅ No hay productos por comprar');return;}
+  S.shopChecked = new Set();
+  renderShopBody();
+  updateShopProgress();
+  document.getElementById('shopOverlay').classList.add('open');
+}
+function exitShopMode() { document.getElementById('shopOverlay').classList.remove('open'); }
+
+function renderShopBody() {
+  const needed = S.products.filter(p=>p.status==='needed');
+  const byCategory = {};
+  needed.forEach(p=>{(byCategory[p.category]=byCategory[p.category]||[]).push(p);});
+  let html='';
+  Object.entries(byCategory).forEach(([cat,items])=>{
+    html+=`<div class="shop-cat-hd">${catEmoji(cat)} ${cat}</div>`;
+    items.forEach(p=>{
+      html+=`<div class="shop-item${S.shopChecked.has(p.id)?' done':''}" onclick="toggleShopItem('${p.id}')" data-sid="${p.id}">
+        <div class="shop-item-check">${S.shopChecked.has(p.id)?'✓':''}</div>
+        <div class="shop-item-name">${p.name}</div>
+        <div class="shop-item-unit">${p.unit}</div>
+      </div>`;
+    });
+  });
+  document.getElementById('shopBody').innerHTML=html;
+}
+function toggleShopItem(id) {
+  if(S.shopChecked.has(id)) S.shopChecked.delete(id);
+  else S.shopChecked.add(id);
+  const el = document.querySelector(`[data-sid="${id}"]`);
+  if(el){
+    el.classList.toggle('done',S.shopChecked.has(id));
+    el.querySelector('.shop-item-check').textContent = S.shopChecked.has(id)?'✓':'';
+  }
+  updateShopProgress();
+}
+function updateShopProgress() {
+  const total = S.products.filter(p=>p.status==='needed').length;
+  const done = S.shopChecked.size;
+  document.getElementById('shopCount').textContent = `${done}/${total}`;
+  document.getElementById('shopFill').style.width = `${total?done/total*100:0}%`;
+  document.getElementById('shopFinishBtn').textContent = done>0?`Finalizar compra (${done})`:'Finalizar compra';
+}
+function finishShopping() {
+  const ids = [...S.shopChecked];
+  if(!ids.length){exitShopMode();return;}
+  document.getElementById('bulkCount').textContent = `${ids.length} producto${ids.length>1?'s':''} seleccionados`;
+  document.getElementById('bulkStore').value='';
+  document.getElementById('bulkDate').value=today();
+  // Build cost inputs per item
+  let html='<div class="card-label" style="margin-top:4px">Costos (opcional, por ítem)</div>';
+  ids.forEach(id=>{
+    const p=S.products.find(x=>x.id===id);
+    html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="flex:1;font-size:.88rem;font-weight:600">${catEmoji(p.category)} ${p.name}</span>
+      <input class="fi" type="number" id="bc-${id}" placeholder="Precio" min="0" step="0.01" style="width:110px"/>
+    </div>`;
+  });
+  document.getElementById('bulkItems').innerHTML=html;
+  openSheet('bulkOverlay');
+}
+function confirmBulkBuy() {
+  const ids=[...S.shopChecked];
+  const store=document.getElementById('bulkStore').value.trim()||null;
+  const date=document.getElementById('bulkDate').value||today();
+  const currency=S.settings.currency||'$';
+  ids.forEach(id=>{
+    const p=S.products.find(x=>x.id===id); if(!p) return;
+    const costEl=document.getElementById('bc-'+id);
+    const cost=costEl?parseFloat(costEl.value)||null:null;
+    p.status='active'; p.cur={purchasedDate:date,cost,currency,store};
+  });
+  save(); closeSheet('bulkOverlay'); exitShopMode();
+  renderLista(); renderDespensa(); updateNotifBadge();
+  toast(`✅ ${ids.length} producto${ids.length>1?'s':''} marcados como comprados`);
+}
+
+// ═══════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════
+function loadConfig() {
+  document.getElementById('cfgBudget').value = S.settings.budget||'';
+  document.getElementById('cfgCurrency').value = S.settings.currency||'$';
+  document.getElementById('cfgDays').value = S.settings.notifyDays||2;
+  const dark = document.documentElement.getAttribute('data-theme')==='dark';
+  document.getElementById('darkToggle').checked = dark;
+}
+function saveConfig() {
+  S.settings.budget = parseFloat(document.getElementById('cfgBudget').value)||0;
+  S.settings.currency = document.getElementById('cfgCurrency').value;
+  S.settings.notifyDays = parseInt(document.getElementById('cfgDays').value)||2;
+  save(); updateNotifBadge();
+}
+function exportData() {
+  const blob=new Blob([JSON.stringify({products:S.products,settings:S.settings},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`smartcart-${today()}.json`; a.click();
+}
+function importData() { document.getElementById('importFile').click(); }
+function onImportFile(e) {
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.products){S.products=d.products;if(d.settings)S.settings={...S.settings,...d.settings};save();renderLista();toast('✅ Datos importados');}
+      else{toast('❌ Archivo inválido');}
+    }catch{toast('❌ Error al leer el archivo');}
+  };
+  r.readAsText(f); e.target.value='';
+}
+function clearData() {
+  if(!confirm('¿Borrar TODOS los datos? No se puede deshacer.')) return;
+  localStorage.removeItem('sc3'); location.reload();
+}
+
+// ═══════════════════════════════════════════════════════
+//  PWA
+// ═══════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+function init() {
+  load();
+  applyTheme(S.settings.darkMode||'auto');
+  renderLista();
+  updateNotifBadge();
+  // Check alerts hourly
+  setInterval(()=>{
+    updateNotifBadge();
+    if(Notification.permission==='granted'){
+      getAlerts().forEach(p=>{
+        const l=daysLeft(p);
+        new Notification(`SmartCart: ${p.name}`,{body:`Se te acaba ${l===0?'hoy':`en ${l} día${l>1?'s':''}`}. ¡Hora de comprar!`});
+      });
+    }
+  },3600000);
+}
+init();
+</script>
+</body>
+</html>
